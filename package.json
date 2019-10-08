@@ -8,11 +8,15 @@
     "react-dom": "^16.10.2",
     "react-scripts": "3.2.0"
   },
+  "main": "public/main.js",
+  "rescripts": [
+    "env"
+  ],
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "wait-on http://localhost:3000 && cross-env ELECTRON_START_URL=http://localhost:3000 electron .",
+    "start-server": "cross-env BROWSER=none rescripts start",
+    "build": "rescripts build",
+    "test": "rescripts test"
   },
   "eslintConfig": {
     "extends": "react-app"
