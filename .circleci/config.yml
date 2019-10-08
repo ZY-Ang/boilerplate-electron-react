@@ -1,0 +1,51 @@
+# Check https://circleci.com/docs/2.0/ for more details
+#
+version: 2.1
+
+executors:
+  electron_windows:
+    docker:
+      - image: electronuserland/builder:wine
+
+jobs:
+  build_windows:
+    executor: electron_windows
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          name: Restore latest node_modules from cache
+          keys:
+            - app-v1-{{ arch }}-{{ .Branch }}-{{ checksum "package-lock.json" }}-{{ .Revision }}
+            - app-v1-{{ arch }}-{{ .Branch }}-{{ checksum "package-lock.json" }}
+            - app-v1-{{ arch }}-{{ .Branch }}
+            - app-v1-{{ arch }}
+      - run: npm install
+      - save_cache:
+          name: Save post-install node_modules into cache
+          key: app-v1-{{ arch }}-{{ .Branch }}-{{ checksum "package-lock.json" }}-{{ .Revision }}
+          paths:
+            - ~/repo/node_modules
+      - run: npm run electron-pack
+      - store_artifacts:
+          # TODO: Rename My Electron App Setup 0.1.0.exe to whatever your expected artifact name is
+          path: "~/repo/dist/My Electron App Setup 0.1.0.exe"
+          destination: "Setup.exe"
+
+  build_macos:
+    macos:
+      xcode: 10.0.0
+    steps:
+      - checkout
+      - run: security create-keychain -p $KEYCHAIN_PASSWORD build.keychain
+      - run: security default-keychain -s build.keychain
+      - run: security unlock-keychain -p $KEYCHAIN_PASSWORD build.keychain
+      - run: echo $KEYSTORE_IN_BASE64 | base64 --decode - > keystore.p12
+      - run: security import keystore.p12 -k build.keychain -P $KEYCHAIN_PASSWORD -T /usr/bin/codesign
+      - run: yarn && yarn release --mac
+
+workflows:
+  version: 2
+  master_flow:
+    jobs:
+      - build_windows
