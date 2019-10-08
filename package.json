@@ -8,15 +8,48 @@
     "react-dom": "^16.10.2",
     "react-scripts": "3.2.0"
   },
-  "main": "public/main.js",
+  "main": "public/electron.js",
+  "homepage": "./",
+  "author": {
+    "name": "Your name",
+    "email": "yourname@yourdomain.com",
+    "url": "https://yourwebsite.com"
+  },
+  "build": {
+    "appId": "com.boilerplate.electron",
+    "productName": "My Electron App",
+    "copyright": "Copyright © 2019 ${author}",
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "ia32",
+            "x64"
+          ]
+        }
+      ]
+    },
+    "files": [
+      "build/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    }
+  },
   "rescripts": [
     "env"
   ],
   "scripts": {
     "start": "wait-on http://localhost:3000 && cross-env ELECTRON_START_URL=http://localhost:3000 electron .",
     "start-server": "cross-env BROWSER=none rescripts start",
+    "electron-pack": "npm run pack:win",
+    "pack:osx": "electron-builder build --macos",
+    "pack:win": "electron-builder build --windows",
     "build": "rescripts build",
-    "test": "rescripts test"
+    "test": "rescripts test",
+    "postinstall": "electron-builder install-app-deps",
+    "preelectron-pack": "npm run build"
   },
   "eslintConfig": {
     "extends": "react-app"
